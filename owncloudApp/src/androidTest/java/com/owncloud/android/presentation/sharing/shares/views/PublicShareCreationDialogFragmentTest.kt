@@ -40,11 +40,12 @@ import com.owncloud.android.lib.resources.status.CapabilityBooleanType
 import com.owncloud.android.presentation.sharing.shares.fragment.PublicShareDialogFragment
 import com.owncloud.android.utils.AppTestUtil
 import com.owncloud.android.utils.DateUtils
+import io.mockk.every
+import io.mockk.mockkClass
 import org.hamcrest.CoreMatchers.not
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
+import org.junit.runner.RunWith
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -53,7 +54,7 @@ class PublicShareCreationDialogFragmentTest {
     @JvmField
     val activityRule = ActivityTestRule(TestShareFileActivity::class.java, true, true)
 
-    private val file = mock(OCFile::class.java)
+    private val file = mockkClass(OCFile::class)
 
     @Test
     fun showDialogTitle() {
@@ -199,7 +200,8 @@ class PublicShareCreationDialogFragmentTest {
             )
         )
 
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
+
         onView(withId(R.id.shareViaLinkEditPermissionGroup)).check(matches(isDisplayed()))
     }
 
@@ -213,7 +215,8 @@ class PublicShareCreationDialogFragmentTest {
             )
         )
 
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
+
         onView(withId(R.id.shareViaLinkEditPermissionGroup)).check(matches(not(isDisplayed())))
     }
 
@@ -273,7 +276,7 @@ class PublicShareCreationDialogFragmentTest {
                 sharingPublicPasswordEnforced = CapabilityBooleanType.TRUE.value
             )
         )
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
         onView(withId(R.id.shareViaLinkEditPermissionReadOnly)).check(matches(isDisplayed()))
         onView(withId(R.id.shareViaLinkEditPermissionReadOnly)).perform(click())
         onView(withId(R.id.shareViaLinkPasswordLabel))
@@ -291,7 +294,7 @@ class PublicShareCreationDialogFragmentTest {
                 sharingPublicPasswordEnforced = CapabilityBooleanType.FALSE.value
             )
         )
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
         onView(withId(R.id.shareViaLinkEditPermissionReadOnly)).check(matches(isDisplayed()))
         onView(withId(R.id.shareViaLinkEditPermissionReadOnly)).perform(click())
         onView(withId(R.id.shareViaLinkPasswordLabel))
@@ -309,7 +312,7 @@ class PublicShareCreationDialogFragmentTest {
                 sharingPublicPasswordEnforced = CapabilityBooleanType.TRUE.value
             )
         )
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
         onView(withId(R.id.shareViaLinkEditPermissionReadAndWrite)).check(matches(isDisplayed()))
         onView(withId(R.id.shareViaLinkEditPermissionReadAndWrite)).perform(click())
         onView(withId(R.id.shareViaLinkPasswordLabel))
@@ -327,7 +330,7 @@ class PublicShareCreationDialogFragmentTest {
                 sharingPublicPasswordEnforced = CapabilityBooleanType.FALSE.value
             )
         )
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
         onView(withId(R.id.shareViaLinkEditPermissionReadAndWrite)).check(matches(isDisplayed()))
         onView(withId(R.id.shareViaLinkEditPermissionReadAndWrite)).perform(click())
         onView(withId(R.id.shareViaLinkPasswordLabel))
@@ -345,7 +348,7 @@ class PublicShareCreationDialogFragmentTest {
                 sharingPublicPasswordEnforced = CapabilityBooleanType.FALSE.value
             )
         )
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
         onView(withId(R.id.shareViaLinkEditPermissionUploadFiles)).check(matches(isDisplayed()))
         onView(withId(R.id.shareViaLinkEditPermissionUploadFiles)).perform(click())
         onView(withId(R.id.shareViaLinkPasswordLabel))
@@ -363,7 +366,7 @@ class PublicShareCreationDialogFragmentTest {
                 sharingPublicPasswordEnforced = CapabilityBooleanType.FALSE.value
             )
         )
-        `when`(file.isFolder).thenReturn(true)
+        every { file.isFolder } returns true
         onView(withId(R.id.shareViaLinkEditPermissionUploadFiles)).check(matches(isDisplayed()))
         onView(withId(R.id.shareViaLinkEditPermissionUploadFiles)).perform(click())
         onView(withId(R.id.shareViaLinkPasswordLabel))
@@ -379,9 +382,9 @@ class PublicShareCreationDialogFragmentTest {
         val filePath = "/Documents/doc3"
         val fileMimeType = ".txt"
 
-        `when`(file.remotePath).thenReturn(filePath)
-        `when`(file.mimetype).thenReturn(fileMimeType)
-        `when`(file.isFolder).thenReturn(isFolder)
+        every { file.remotePath } returns filePath
+        every { file.mimetype } returns fileMimeType
+        every { file.isFolder } returns isFolder
 
         val publicShareDialogFragment = PublicShareDialogFragment.newInstanceToCreate(
             file,
