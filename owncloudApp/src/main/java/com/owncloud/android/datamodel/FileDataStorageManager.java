@@ -44,13 +44,13 @@ import androidx.core.util.Pair;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
+import com.owncloud.android.data.sharing.shares.db.OCShareEntity;
 import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.lib.resources.shares.RemoteShare;
 import com.owncloud.android.lib.resources.shares.ShareType;
 import com.owncloud.android.lib.resources.status.CapabilityBooleanType;
 import com.owncloud.android.lib.resources.status.RemoteCapability;
-import com.owncloud.android.shares.domain.OCShare;
 import com.owncloud.android.utils.FileStorageUtils;
 
 import java.io.File;
@@ -138,7 +138,7 @@ public class FileDataStorageManager {
     /**
      * This will return a OCFile by its given FileId here refered as the remoteId.
      * Its the fileId ownCloud Core uses to identify a file even if its name has changed.
-     *
+     * <p>
      * An Explenation about how to use ETags an those FileIds can be found here:
      * <a href="https://github.com/owncloud/client/wiki/Etags-and-file-ids" />
      *
@@ -469,8 +469,8 @@ public class FileDataStorageManager {
      * Adds the appropriate initial value for ProviderTableMeta.FILE_KEEP_IN_SYNC to
      * passed {@link ContentValues} instance.
      *
-     * @param file      {@link OCFile} which av-offline property will be set.
-     * @param cv        {@link ContentValues} instance where the property is added.
+     * @param file {@link OCFile} which av-offline property will be set.
+     * @param cv   {@link ContentValues} instance where the property is added.
      */
     private void setInitialAvailableOfflineStatus(OCFile file, ContentValues cv) {
         // set appropriate av-off folder depending on ancestor
@@ -490,15 +490,15 @@ public class FileDataStorageManager {
 
     /**
      * Updates available-offline status of OCFile received as a parameter, with its current value.
-     *
+     * <p>
      * Saves the new value property for the given file in persistent storage.
-     *
+     * <p>
      * If the file is a folder, updates the value of all its known descendants accordingly.
      *
-     * @param   file                        File which available-offline status will be updated.
-     * @return                              'true' if value was updated, 'false' otherwise.
-     * @throws IllegalArgumentException     If file is set to
-     *                                      OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE_PARENT.
+     * @param file File which available-offline status will be updated.
+     * @return 'true' if value was updated, 'false' otherwise.
+     * @throws IllegalArgumentException If file is set to
+     *                                  OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE_PARENT.
      */
     public boolean saveLocalAvailableOfflineStatus(OCFile file) {
         if (!fileExists(file.getFileId())) {
@@ -940,7 +940,7 @@ public class FileDataStorageManager {
 
         if (!onlyAvailableOffline) {
             selection = ProviderTableMeta.FILE_PARENT + "=?";
-            selectionArgs = new String[] {String.valueOf(parentId)};
+            selectionArgs = new String[]{String.valueOf(parentId)};
         } else {
             selection = ProviderTableMeta.FILE_PARENT + "=? AND (" + ProviderTableMeta.FILE_KEEP_IN_SYNC +
                     " = ? OR " + ProviderTableMeta.FILE_KEEP_IN_SYNC + "=? )";
@@ -978,7 +978,7 @@ public class FileDataStorageManager {
     /**
      * Checks if it is favorite or it is inside a favorite folder
      *
-     * @param file              {@link OCFile} which ancestors will be searched.
+     * @param file {@link OCFile} which ancestors will be searched.
      * @return true/false
      */
     private boolean isAnyAncestorAvailableOfflineFolder(OCFile file) {
@@ -988,9 +988,9 @@ public class FileDataStorageManager {
     /**
      * Returns ancestor folder with available offline status AVAILABLE_OFFLINE.
      *
-     * @param file              {@link OCFile} which ancestors will be searched.
+     * @param file {@link OCFile} which ancestors will be searched.
      * @return Ancestor folder with available offline status AVAILABLE_OFFLINE, or null if
-     *                          does not exist.
+     * does not exist.
      */
     public OCFile getAvailableOfflineAncestorOf(OCFile file) {
         OCFile avOffAncestor = null;
@@ -1198,13 +1198,13 @@ public class FileDataStorageManager {
     }
 
     /**
-     * Retrieves an stored {@link OCShare} given its id.
+     * Retrieves an stored {@link OCShareEntity} given its id.
      *
-     * @param id    Identifier.
-     * @return Stored {@link OCShare} given its id.
+     * @param id Identifier.
+     * @return Stored {@link OCShareEntity} given its id.
      */
-    public OCShare getShareById(long id) {
-        OCShare share = null;
+    public OCShareEntity getShareById(long id) {
+        OCShareEntity share = null;
         Cursor c = getShareCursorForValue(
                 ProviderTableMeta._ID,
                 String.valueOf(id)
@@ -1219,13 +1219,13 @@ public class FileDataStorageManager {
     }
 
     /**
-     * Retrieves an stored {@link OCShare} given its id.
+     * Retrieves an stored {@link OCShareEntity} given its id.
      *
-     * @param id    Identifier of the share in OC server.
-     * @return Stored {@link OCShare} given its remote id.
+     * @param id Identifier of the share in OC server.
+     * @return Stored {@link OCShareEntity} given its remote id.
      */
-    public OCShare getShareByRemoteId(long id) {
-        OCShare share = null;
+    public OCShareEntity getShareByRemoteId(long id) {
+        OCShareEntity share = null;
         Cursor c = getShareCursorForValue(
                 ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED,
                 String.valueOf(id)
@@ -1243,8 +1243,8 @@ public class FileDataStorageManager {
      * Checks the existance of an stored {@link RemoteShare} matching the given remote id (not to be confused with
      * the local id) in the current account.
      *
-     * @param remoteId      Remote of the share in the server.
-     * @return              'True' if a matching {@link RemoteShare} is stored in the current account.
+     * @param remoteId Remote of the share in the server.
+     * @return 'True' if a matching {@link RemoteShare} is stored in the current account.
      */
     private boolean shareExistsForRemoteId(long remoteId) {
         return shareExistsForValue(ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED, String.valueOf(remoteId));
@@ -1254,9 +1254,9 @@ public class FileDataStorageManager {
      * Checks the existance of an stored {@link RemoteShare} in the current account
      * matching a given column and a value for that column
      *
-     * @param key           Name of the column to match.
-     * @param value         Value of the column to match.
-     * @return              'True' if a matching {@link RemoteShare} is stored in the current account.
+     * @param key   Name of the column to match.
+     * @param value Value of the column to match.
+     * @return 'True' if a matching {@link RemoteShare} is stored in the current account.
      */
     private boolean shareExistsForValue(String key, String value) {
         Cursor c = getShareCursorForValue(key, value);
@@ -1272,9 +1272,9 @@ public class FileDataStorageManager {
      * Gets a {@link Cursor} for an stored {@link RemoteShare} in the current account
      * matching a given column and a value for that column
      *
-     * @param key           Name of the column to match.
-     * @param value         Value of the column to match.
-     * @return              'True' if a matching {@link RemoteShare} is stored in the current account.
+     * @param key   Name of the column to match.
+     * @param value Value of the column to match.
+     * @return 'True' if a matching {@link RemoteShare} is stored in the current account.
      */
     private Cursor getShareCursorForValue(String key, String value) {
         Cursor c;
@@ -1306,10 +1306,10 @@ public class FileDataStorageManager {
         return c;
     }
 
-    private OCShare createShareInstance(Cursor c) {
-        OCShare share = null;
+    private OCShareEntity createShareInstance(Cursor c) {
+        OCShareEntity share = null;
         if (c != null) {
-            share = new OCShare(
+            share = new OCShareEntity(
                     c.getLong(c.getColumnIndex(ProviderTableMeta.OCSHARES_FILE_SOURCE)),
                     c.getLong(c.getColumnIndex(ProviderTableMeta.OCSHARES_ITEM_SOURCE)),
                     c.getInt(c.getColumnIndex(ProviderTableMeta.OCSHARES_SHARE_TYPE)),
@@ -1414,7 +1414,7 @@ public class FileDataStorageManager {
         }
     }
 
-    public void removeShare(OCShare share) {
+    public void removeShare(OCShareEntity share) {
         Uri share_uri = ProviderTableMeta.CONTENT_URI_SHARE;
         String where = ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + "=?" + " AND " +
                 ProviderTableMeta._ID + "=?";
@@ -1430,103 +1430,11 @@ public class FileDataStorageManager {
         }
     }
 
-    public void saveShares(List<RemoteShare> shares) {
-        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
-
-        // Reset flags & Remove shares for this files
-        String filePath = "";
-        for (RemoteShare share: shares) {
-            if (!filePath.equals(share.getPath())){
-                filePath = share.getPath();
-                resetShareFlagInAFile(filePath);
-                operations = prepareRemoveSharesInFile(filePath, operations);
-            }
-        }
-
-        // Add operations to insert shares
-        operations = prepareInsertShares(shares, operations);
-
-        // apply operations in batch
-        if (operations.size() > 0) {
-            Log_OC.d(TAG, "Sending " + operations.size() + " operations to FileContentProvider");
-            try {
-                if (getContentResolver() != null) {
-                    getContentResolver().applyBatch(MainApp.Companion.getAuthority(), operations);
-
-                } else {
-                    getContentProviderClient().applyBatch(operations);
-                }
-
-            } catch (OperationApplicationException e) {
-                Log_OC.e(TAG, "Exception in batch of operations " + e.getMessage());
-
-            } catch (RemoteException e) {
-                Log_OC.e(TAG, "Exception in batch of operations  " + e.getMessage());
-            }
-        }
-
-    }
-
-    public void removeSharesForFile(String remotePath) {
-        resetShareFlagInAFile(remotePath);
-        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
-        operations = prepareRemoveSharesInFile(remotePath, operations);
-        // apply operations in batch
-        if (operations.size() > 0) {
-            Log_OC.d(TAG, "Sending " + operations.size() + " operations to FileContentProvider");
-            try {
-                if (getContentResolver() != null) {
-                    getContentResolver().applyBatch(MainApp.Companion.getAuthority(), operations);
-
-                } else {
-                    getContentProviderClient().applyBatch(operations);
-                }
-
-            } catch (OperationApplicationException e) {
-                Log_OC.e(TAG, "Exception in batch of operations " + e.getMessage());
-
-            } catch (RemoteException e) {
-                Log_OC.e(TAG, "Exception in batch of operations  " + e.getMessage());
-            }
-        }
-    }
-
-    public void saveSharesInFolder(ArrayList<RemoteShare> shares, OCFile folder) {
-        resetShareFlagsInFolder(folder);
-        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
-        operations = prepareRemoveSharesInFolder(folder, operations);
-
-        if (shares != null) {
-            // prepare operations to insert or update files to save in the given folder
-            operations = prepareInsertShares(shares, operations);
-        }
-
-        // apply operations in batch
-        if (operations.size() > 0) {
-            Log_OC.d(TAG, "Sending " + operations.size() + " operations to FileContentProvider");
-            try {
-                if (getContentResolver() != null) {
-                    getContentResolver().applyBatch(MainApp.Companion.getAuthority(), operations);
-
-                } else {
-
-                    getContentProviderClient().applyBatch(operations);
-                }
-
-            } catch (OperationApplicationException e) {
-                Log_OC.e(TAG, "Exception in batch of operations " + e.getMessage());
-
-            } catch (RemoteException e) {
-
-            }
-        }
-
-    }
-
     /**
      * Prepare operations to insert or update files to save in the given folder
-     * @param shares        List of shares to insert
-     * @param operations    List of operations
+     *
+     * @param shares     List of shares to insert
+     * @param operations List of operations
      * @return
      */
     private ArrayList<ContentProviderOperation> prepareInsertShares(
@@ -1610,7 +1518,7 @@ public class FileDataStorageManager {
 
     }
 
-    public ArrayList<OCShare> getPrivateSharesForAFile(String filePath, String accountName) {
+    public ArrayList<OCShareEntity> getPrivateSharesForAFile(String filePath, String accountName) {
         // Condition
         String where = ProviderTableMeta.OCSHARES_PATH + "=?" + " AND "
                 + ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + "=?" + "AND"
@@ -1638,8 +1546,8 @@ public class FileDataStorageManager {
                 c = null;
             }
         }
-        ArrayList<OCShare> privateShares = new ArrayList<>();
-        OCShare privateShare;
+        ArrayList<OCShareEntity> privateShares = new ArrayList<>();
+        OCShareEntity privateShare;
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -1653,7 +1561,7 @@ public class FileDataStorageManager {
         return privateShares;
     }
 
-    public ArrayList<OCShare> getPublicSharesForAFile(String filePath, String accountName) {
+    public ArrayList<OCShareEntity> getPublicSharesForAFile(String filePath, String accountName) {
         // Condition
         String where = ProviderTableMeta.OCSHARES_PATH + "=?" + " AND "
                 + ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + "=?" + "AND "
@@ -1677,8 +1585,8 @@ public class FileDataStorageManager {
                 c = null;
             }
         }
-        ArrayList<OCShare> publicShares = new ArrayList<>();
-        OCShare publicShare;
+        ArrayList<OCShareEntity> publicShares = new ArrayList<>();
+        OCShareEntity publicShare;
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -2120,7 +2028,7 @@ public class FileDataStorageManager {
     /**
      * Get a collection with all the files set by the user as available offline, from all the accounts
      * in the device, putting away the folders
-     *
+     * <p>
      * This is the only method working with a NULL account in {@link #mAccount}. Not something to do often.
      *
      * @return List with all the files set by the user as available offline.
@@ -2173,7 +2081,7 @@ public class FileDataStorageManager {
      * Get a collection with all the files set by the user as available offline, from current account
      * putting away files whose parent is also available offline
      *
-     * @return      List with all the files set by current user as available offline.
+     * @return List with all the files set by current user as available offline.
      */
     public Vector<OCFile> getAvailableOfflineFilesFromCurrentAccount() {
         Vector<OCFile> result = new Vector<>();
