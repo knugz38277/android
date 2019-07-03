@@ -46,10 +46,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteQueryBuilder
 import com.owncloud.android.MainApp
 import com.owncloud.android.R
-import com.owncloud.android.data.AppExecutors
+import com.owncloud.android.data.Executors
 import com.owncloud.android.data.capabilities.datasources.OCLocalCapabilitiesDataSource
 import com.owncloud.android.data.capabilities.db.OCCapabilityEntity
-import com.owncloud.android.data.common.OwncloudDatabase
+import com.owncloud.android.data.OwncloudDatabase
+import com.owncloud.android.data.ProviderMeta
 import com.owncloud.android.data.sharing.shares.datasources.OCLocalSharesDataSource
 import com.owncloud.android.data.sharing.shares.db.OCShareEntity
 import com.owncloud.android.datamodel.OCFile
@@ -67,7 +68,7 @@ import java.util.HashMap
 /**
  * The ContentProvider for the ownCloud App.
  */
-class FileContentProvider(val appExecutors: AppExecutors = AppExecutors()) : ContentProvider() {
+class FileContentProvider(val executors: Executors = Executors()) : ContentProvider() {
 
     private lateinit var dbHelper: DataBaseHelper
 
@@ -496,9 +497,9 @@ class FileContentProvider(val appExecutors: AppExecutors = AppExecutors()) : Con
     private inner class DataBaseHelper internal constructor(context: Context) :
         SQLiteOpenHelper(
             context,
-            com.owncloud.android.data.common.ProviderMeta.DB_NAME,
+            ProviderMeta.DB_NAME,
             null,
-            com.owncloud.android.data.common.ProviderMeta.DB_VERSION
+            ProviderMeta.DB_VERSION
         ) {
 
         override fun onCreate(db: SQLiteDatabase) {
@@ -948,8 +949,8 @@ class FileContentProvider(val appExecutors: AppExecutors = AppExecutors()) : Con
                     } while (cursor.moveToNext())
 
                     // Insert share list to the new shares table in new database
-                    appExecutors.diskIO().execute {
-                        OCLocalShareDataSource(context).insert(shares)
+                    executors.diskIO().execute {
+                        OCLocalSharesDataSource(context).insert(shares)
                     }
 
                     // Drop old shares table from old database
@@ -971,7 +972,7 @@ class FileContentProvider(val appExecutors: AppExecutors = AppExecutors()) : Con
 
                 if (cursor.moveToFirst()) {
                     // Insert capability to the new capabilities table in new database
-                    appExecutors.diskIO().execute {
+                    executors.diskIO().execute {
                         OCLocalCapabilitiesDataSource(context).insert(
                             listOf(OCCapabilityEntity.fromCursor(cursor))
                         )
