@@ -42,15 +42,6 @@ import com.owncloud.android.lib.resources.shares.RemoteShare
 import com.owncloud.android.lib.resources.shares.ShareType
 import com.owncloud.android.operations.RemoveShareOperation
 import com.owncloud.android.operations.common.OperationType
-<<<<<<< HEAD:owncloudApp/src/main/java/com/owncloud/android/shares/presentation/ShareActivity.kt
-import com.owncloud.android.sharees.presentation.SearchShareesFragment
-import com.owncloud.android.sharees.presentation.UsersAndGroupsSearchProvider
-import com.owncloud.android.shares.domain.OCShare
-import com.owncloud.android.shares.presentation.fragment.EditPrivateShareFragment
-import com.owncloud.android.shares.presentation.fragment.PublicShareDialogFragment
-import com.owncloud.android.shares.presentation.fragment.ShareFileFragment
-import com.owncloud.android.shares.presentation.fragment.ShareFragmentListener
-=======
 import com.owncloud.android.presentation.capabilities.OCCapabilityViewModel
 import com.owncloud.android.presentation.sharing.sharees.SearchShareesFragment
 import com.owncloud.android.presentation.sharing.sharees.UsersAndGroupsSearchProvider
@@ -58,8 +49,6 @@ import com.owncloud.android.presentation.sharing.shares.fragment.EditShareFragme
 import com.owncloud.android.presentation.sharing.shares.fragment.PublicShareDialogFragment
 import com.owncloud.android.presentation.sharing.shares.fragment.ShareFileFragment
 import com.owncloud.android.presentation.sharing.shares.fragment.ShareFragmentListener
->>>>>>> Split up code into different modules following a layers approach:owncloudApp/src/main/java/com/owncloud/android/presentation/sharing/shares/ShareActivity.kt
-import com.owncloud.android.testing.OpenForTesting
 import com.owncloud.android.ui.activity.FileActivity
 import com.owncloud.android.ui.dialog.RemoveShareDialogFragment
 import com.owncloud.android.ui.errorhandling.ErrorMessageAdapter
@@ -70,7 +59,6 @@ import org.koin.core.parameter.parametersOf
 /**
  * Activity for sharing files
  */
-@OpenForTesting
 class ShareActivity : FileActivity(), ShareFragmentListener {
     /**
      * Shortcut to get access to the [ShareFileFragment] instance, if any
@@ -160,8 +148,6 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
         super.onStop()
     }
 
-<<<<<<< HEAD:owncloudApp/src/main/java/com/owncloud/android/shares/presentation/ShareActivity.kt
-=======
     /**
      * Updates the view, reading data from [com.owncloud.android.data.viewmodel.OCShareViewModel]
      */
@@ -172,7 +158,6 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
         }
     }
 
->>>>>>> Split up code into different modules following a layers approach:owncloudApp/src/main/java/com/owncloud/android/presentation/sharing/shares/ShareActivity.kt
     override fun refreshAllShares() {
         refreshCapabilities()
         refreshPrivateShares()
@@ -370,9 +355,6 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
         }
     }
 
-<<<<<<< HEAD:owncloudApp/src/main/java/com/owncloud/android/shares/presentation/ShareActivity.kt
-    override fun showEditPrivateShare(share: OCShare) {
-=======
     override fun showSearchUsersAndGroups() {
         val searchFragment = SearchShareesFragment.newInstance(file, account)
         val ft = supportFragmentManager.beginTransaction()
@@ -385,7 +367,6 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
     }
 
     override fun showEditPrivateShare(share: OCShareEntity) {
->>>>>>> Split up code into different modules following a layers approach:owncloudApp/src/main/java/com/owncloud/android/presentation/sharing/shares/ShareActivity.kt
         val ft = supportFragmentManager.beginTransaction()
         val prev = supportFragmentManager.findFragmentByTag(TAG_EDIT_SHARE_FRAGMENT)
         if (prev != null) {
@@ -394,16 +375,11 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
         ft.addToBackStack(null)
 
         // Create and show the dialog.
-<<<<<<< HEAD:owncloudApp/src/main/java/com/owncloud/android/shares/presentation/ShareActivity.kt
-        val newFragment = EditPrivateShareFragment.newInstance(share, file, account)
-        newFragment.show(ft, TAG_EDIT_SHARE_FRAGMENT)
-=======
         val newFragment = EditShareFragment.newInstance(share, file, account)
         newFragment.show(
             ft,
             TAG_EDIT_SHARE_FRAGMENT
         )
->>>>>>> Split up code into different modules following a layers approach:owncloudApp/src/main/java/com/owncloud/android/presentation/sharing/shares/ShareActivity.kt
     }
 
     override fun updatePrivateShare(remoteId: Long, permissions: Int) {
@@ -609,7 +585,6 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
         )
     }
 
-<<<<<<< HEAD:owncloudApp/src/main/java/com/owncloud/android/shares/presentation/ShareActivity.kt
     override fun copyOrSendPublicLink(share: OCShare) {
         fileOperationsHelper.copyOrSendPublicLink(share)
     }
@@ -620,10 +595,6 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
 
     override fun removeShare(shareRemoteId: Long) {
         ocShareViewModel.deleteShare(shareRemoteId).observe(
-=======
-    override fun removePublicShare(share: OCShareEntity) {
-        ocShareViewModel.deletePublicShare(share.remoteId).observe(
->>>>>>> Split up code into different modules following a layers approach:owncloudApp/src/main/java/com/owncloud/android/presentation/sharing/shares/ShareActivity.kt
             this,
             Observer { resource ->
                 when (resource?.status) {
@@ -654,13 +625,10 @@ class ShareActivity : FileActivity(), ShareFragmentListener {
         )
     }
 
-<<<<<<< HEAD:owncloudApp/src/main/java/com/owncloud/android/shares/presentation/ShareActivity.kt
-=======
     override fun copyOrSendPublicLink(share: OCShareEntity) {
         fileOperationsHelper.copyOrSendPublicLink(share)
     }
 
->>>>>>> Split up code into different modules following a layers approach:owncloudApp/src/main/java/com/owncloud/android/presentation/sharing/shares/ShareActivity.kt
     /**
      * Updates the view associated to the activity after the finish of some operation over files
      * in the current account.
