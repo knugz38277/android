@@ -67,7 +67,7 @@
   resolved "https://registry.yarnpkg.com/@antora/page-composer/-/page-composer-2.0.0.tgz#4fc369f9e791aa367fef51a1df2d21f1ce42eaf2"
   integrity sha512-1I0vhO6UCyNJRLYICTU+jCTEmkHeJ13tao0nfOOAiSyamDkyX7vM935qfzGBjwZdur8Clq4jpiCuvFTmXMtIfQ==
   dependencies:
-    handlebars "^4.0.12"
+    handlebars "^4.1.0"
     require-from-string "^2.0.2"
 
 "@antora/playbook-builder@2.0.0":
@@ -908,9 +908,9 @@ gulp-vinyl-zip@^2.1.2:
     yauzl "^2.2.1"
     yazl "^2.2.1"
 
-handlebars@^4.0.12:
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.0.12.tgz#2c15c8a96d46da5e266700518ba8cb8d919d5bc5"
+handlebars@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.1.0.tgz#2c15c8a96d46da5e266700518ba8cb8d919d5bc5"
   integrity sha512-RhmTekP+FZL+XNhwS1Wf+bTTZpdLougwt5pcgA1tuz6Jcx0fpH/7z0qd71RKnZHBCxIRBHfBOnio4gViPemNzA==
   dependencies:
     async "^2.5.0"
