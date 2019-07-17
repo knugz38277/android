@@ -295,7 +295,7 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
         activity!!.setTitle(R.string.share_dialog_title)
 
         // Load all shares in the list
-        listener?.startShareObservers()
+        listener?.startObserving()
     }
 
     override fun onAttach(context: Context?) {
