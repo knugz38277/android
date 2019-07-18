@@ -242,7 +242,7 @@
   <string name="confirmation_remove_local">Μόνο τοπικά</string>
   <string name="confirmation_remove_account_alert">Θέλετε να αφαιρέσετε τον λογαριασμό %1$s;</string>
   <string name="confirmation_remove_public_share_title">Αφαίρεση συνδέσμου</string>
-  <string name="confirmation_remove_public_share_message">Θέλετε στα αλήθεια να αφαιρέσετε το %1$s;</string>
+  <string name="confirmation_remove_share_message">Θέλετε στα αλήθεια να αφαιρέσετε το %1$s;</string>
   <string name="remove_success_msg">Αφαίρεση επιτυχής</string>
   <string name="remove_fail_msg">Η αφαίρεση απέτυχε</string>
   <string name="rename_dialog_title">Εισάγετε νέο όνομα</string>

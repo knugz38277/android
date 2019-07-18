@@ -26,6 +26,7 @@ package com.owncloud.android.presentation.ui.sharing.fragments
 import android.accounts.Account
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +34,7 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.owncloud.android.R
 import com.owncloud.android.authentication.AccountUtils
@@ -44,12 +46,18 @@ import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.lib.resources.shares.ShareType
 import com.owncloud.android.lib.resources.status.CapabilityBooleanType
 import com.owncloud.android.lib.resources.status.OwnCloudVersion
+import com.owncloud.android.presentation.UIResult.Status
 import com.owncloud.android.presentation.adapters.sharing.SharePublicLinkListAdapter
 import com.owncloud.android.presentation.adapters.sharing.ShareUserListAdapter
+import com.owncloud.android.presentation.viewmodels.capabilities.OCCapabilityViewModel
+import com.owncloud.android.presentation.viewmodels.sharing.OCShareViewModel
+import com.owncloud.android.ui.activity.BaseActivity
 import com.owncloud.android.utils.DisplayUtils
 import com.owncloud.android.utils.MimetypeIconUtil
 import kotlinx.android.synthetic.main.share_file_layout.*
 import kotlinx.android.synthetic.main.share_file_layout.view.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import java.util.Collections
 import java.util.Locale
 
@@ -182,6 +190,19 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
     private val isPublicShareDisabled: Boolean
         get() = capabilities != null && capabilities?.filesSharingPublicEnabled == CapabilityBooleanType.FALSE.value
 
+    private val ocCapabilityViewModel: OCCapabilityViewModel by viewModel {
+        parametersOf(
+            account
+        )
+    }
+
+    private val ocShareViewModel: OCShareViewModel by viewModel {
+        parametersOf(
+            file?.remotePath,
+            account
+        )
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -294,8 +315,8 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
 
         activity!!.setTitle(R.string.share_dialog_title)
 
-        // Load all shares in the list
-        listener?.startObserving()
+        observeCapabilities()
+        observeShares()
     }
 
     override fun onAttach(context: Context?) {
@@ -310,6 +331,85 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
     override fun onDetach() {
         super.onDetach()
         listener = null
+    }
+
+    private fun observeCapabilities() {
+        ocCapabilityViewModel.capabilities.observe(
+            this,
+            Observer { uiResult ->
+                when (uiResult?.status) {
+                    Status.SUCCESS -> {
+                        updateCapabilities(uiResult.data)
+                        (activity as BaseActivity).dismissLoadingDialog()
+                    }
+                    Status.ERROR -> {
+                        Snackbar.make(
+                            activity?.findViewById(android.R.id.content)!!,
+                            uiResult.errorMessage!!,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        updateCapabilities(uiResult.data)
+                        (activity as BaseActivity).dismissLoadingDialog()
+                    }
+                    Status.LOADING -> {
+                        (activity as BaseActivity).showLoadingDialog(R.string.common_loading)
+                        updateCapabilities(uiResult.data)
+                    }
+                    else -> {
+                        Log.d(TAG, "Unknown status when loading capabilities in account ${account?.name}")
+                    }
+                }
+            }
+        )
+    }
+
+    private fun observeShares() {
+        ocShareViewModel.shares.observe(
+            this,
+            Observer { uiResult ->
+                when (uiResult?.status) {
+                    Status.SUCCESS -> {
+                        updateShares(uiResult.data as ArrayList<OCShareEntity>)
+                        (activity as BaseActivity).dismissLoadingDialog() // TODO Use listener
+                    }
+                    Status.ERROR -> {
+                        Snackbar.make(
+                            activity?.findViewById(android.R.id.content)!!,
+                            uiResult.errorMessage!!,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        updateShares(uiResult.data)
+                        (activity as BaseActivity).dismissLoadingDialog() // TODO Use listener
+                    }
+                    Status.LOADING -> {
+                        (activity as BaseActivity).showLoadingDialog(R.string.common_loading) // TODO Use listener
+                        updateShares(uiResult.data)
+                    }
+                    else -> {
+                        Log.d(
+                            TAG, "Unknown status when loading public shares for file ${file?.fileName} in account" +
+                                    "${account?.name}"
+                        )
+                    }
+                }
+            }
+        )
+    }
+
+    private fun updateShares(shares: List<OCShareEntity>?) {
+        shares?.filter { share ->
+            share.shareType == ShareType.USER.value ||
+                    share.shareType == ShareType.GROUP.value ||
+                    share.shareType == ShareType.FEDERATED.value
+        }.also { privateShares ->
+            updatePrivateShares(privateShares as ArrayList<OCShareEntity>)
+        }
+
+        shares?.filter { share ->
+            share.shareType == ShareType.PUBLIC_LINK.value
+        }.also { publicShares ->
+            updatePublicShares(publicShares as ArrayList<OCShareEntity>)
+        }
     }
 
     /**************************************************************************************************************
@@ -335,7 +435,7 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
      *********************************************** PRIVATE SHARES ***********************************************
      **************************************************************************************************************/
 
-    fun updatePrivateShares(privateShares: ArrayList<OCShareEntity>) {
+    private fun updatePrivateShares(privateShares: ArrayList<OCShareEntity>) {
         // Get Users and Groups
         this.privateShares = ArrayList(privateShares.filter {
             it.shareType == ShareType.USER.value ||
@@ -375,7 +475,7 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
     override fun unshareButtonPressed(share: OCShareEntity) {
         // Unshare
         Log_OC.d(TAG, "Removing private share with " + share.sharedWithDisplayName)
-        listener?.removeShare(share.remoteId)
+        removeShare(share)
     }
 
     override fun editShare(share: OCShareEntity) {
@@ -384,11 +484,16 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
         listener?.showEditPrivateShare(share)
     }
 
+    override fun removeShare(share: OCShareEntity) {
+        // Remove public link from server
+        listener?.showRemoveShare(share)
+    }
+
     /**************************************************************************************************************
      *********************************************** PUBLIC SHARES ************************************************
      **************************************************************************************************************/
 
-    fun updatePublicShares(publicShares: ArrayList<OCShareEntity>) {
+    private fun updatePublicShares(publicShares: ArrayList<OCShareEntity>) {
         publicLinks = publicShares
         updatePublicLinkButton()
         updateListOfPublicLinks()
@@ -446,11 +551,6 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
         listener?.copyOrSendPublicLink(share)
     }
 
-    override fun removePublicShare(share: OCShareEntity) {
-        // Remove public link from server
-        listener?.showRemovePublicShare(share)
-    }
-
     /**
      * Check if the multiple public sharing support should be enabled or not depending on the
      * capabilities and server version
@@ -472,7 +572,7 @@ class ShareFileFragment : Fragment(), ShareUserListAdapter.ShareUserAdapterListe
     }
 
     override fun editPublicShare(share: OCShareEntity) {
-//        listener?.showEditPublicShare(share)
+        listener?.showEditPublicShare(share)
     }
 
     /**
